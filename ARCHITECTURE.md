@@ -25,11 +25,11 @@
 ## Core Components
 
 ### 1. Teams Bot Handler
-**File**: `src/bot/teams-handler.ts`
+**File**: `src/teams/message-handler.ts`
 
 **Responsibilities**:
 - Receive incoming Teams messages
-- Route to query parser
+- Route to email auditor
 - Send Adaptive Card responses
 - Handle user interactions (buttons, forms)
 
@@ -38,8 +38,8 @@
 - `conversationUpdate` - Bot added to channel
 - `invoke` - Button clicks (future: release email, block sender)
 
-### 2. LLM Query Parser (NEW)
-**File**: `src/services/llm-query-parser.ts`
+### 2. Query Parser (Anthropic Claude SDK)
+**File**: `src/services/query-parser.ts`
 
 **Responsibilities**:
 - Parse natural language questions using Claude API
@@ -90,40 +90,39 @@ const tools = [{
 - Single-turn parsing (no multi-step orchestration needed)
 
 ### 3. Email Auditor
-**File**: `src/services/email-auditor.ts` (NEW)
+**File**: `src/agents/email-auditor.ts`
 
 **Responsibilities**:
-- Search Mimecast for matching emails
-- Filter by sender, status, date range
-- Format results for display
-- Handle pagination (max 50 results)
+- Orchestrate query parsing and Mimecast search
+- Convert tool call parameters to Mimecast API params
+- Execute search and handle errors
+- Return structured results
 
-**Atomic Functions**:
-- `searchMessages(params)` - Call Mimecast API
-- `filterBySender(messages, sender)` - Apply sender filter
-- `filterByStatus(messages, status)` - Apply status filter
-- `sortByDate(messages)` - Order by timestamp
+**Workflow**:
+1. Receive user query from Teams handler
+2. Parse query using Anthropic Claude SDK
+3. Execute Mimecast search with parsed parameters
+4. Return results or error
 
 ### 4. Mimecast Client
 **File**: `src/services/mimecast-client.ts`
 
 **Responsibilities**:
-- Authenticate with Mimecast (HMAC or OAuth)
-- Execute API requests
+- Authenticate with Mimecast (HMAC)
+- Execute message search API requests
 - Handle rate limiting (10 req/s)
 - Retry on transient failures
 
 **API Endpoints Used**:
 - `POST /api/message-finder/search` - Search messages
-- `POST /api/message-finder/get-message-info` - Get details
 
-### 5. Response Builder
-**File**: `src/bot/response-builder.ts` (NEW)
+### 5. Adaptive Cards Builder
+**File**: `src/teams/adaptive-cards.ts`
 
 **Responsibilities**:
 - Format search results as Adaptive Cards
 - Create error/empty result cards
-- Build pagination controls (if needed)
+- Build welcome cards
 
 **Card Types**:
 - Search results card (email list)

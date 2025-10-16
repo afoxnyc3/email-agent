@@ -2,6 +2,9 @@
 
 Microsoft Teams bot for querying blocked/held/rejected emails in Mimecast.
 
+**GitHub**: https://github.com/afoxnyc3/email-agent
+**Status**: v0.2.0 (MVP Complete - Ready for Testing)
+
 ## Overview
 
 **Purpose**: Help users investigate email delivery issues by searching Mimecast audit logs via conversational Teams queries.
@@ -14,9 +17,10 @@ Microsoft Teams bot for querying blocked/held/rejected emails in Mimecast.
 
 ## Features
 
-- **Conversational Interface**: Ask questions in natural language (no command syntax)
+- **Natural Language Queries**: Ask questions naturally powered by Anthropic Claude SDK
+- **Tool Calling**: Structured query parsing with `search_mimecast` tool
 - **Mimecast Integration**: Search blocked, held, and rejected emails
-- **Fast Queries**: <5 second response time
+- **Fast Queries**: 3-5 second response time
 - **Rich Responses**: Adaptive Cards with structured email lists
 - **Flexible Filtering**: By sender (email/domain/IP), status, time range
 - **Atomic Code**: Max 25 lines per function, max 150 lines per file
@@ -190,19 +194,21 @@ Response:
 
 ```
 src/
-├── bot/
-│   ├── teams-handler.ts      # Teams message routing
-│   ├── response-builder.ts   # Adaptive Card formatter (NEW)
-│   └── adaptive-cards.ts     # Card templates
+├── agents/
+│   └── email-auditor.ts      # Mimecast search orchestrator
+├── teams/
+│   ├── message-handler.ts    # Teams message routing
+│   ├── bot-adapter.ts        # CloudAdapter setup
+│   └── adaptive-cards.ts     # Adaptive Card templates
 ├── services/
-│   ├── query-parser.ts       # NLP query parsing (NEW)
-│   ├── email-auditor.ts      # Mimecast search orchestrator (NEW)
-│   └── mimecast-client.ts    # Mimecast API integration
+│   ├── query-parser.ts       # Anthropic Claude tool calling
+│   └── mimecast-client.ts    # Mimecast API (HMAC auth)
 ├── lib/
 │   ├── config.ts
 │   ├── logger.ts
 │   └── types.ts
-└── index.ts                   # HTTP server + bot adapter
+├── server.ts                  # Restify HTTP server
+└── index.ts                   # Main entry point
 ```
 
 ### Data Flow
@@ -253,27 +259,28 @@ export function parseTimeRange(query: string): number {
 
 ## Roadmap
 
-### v0.1.0 (Current)
-- [x] Project structure
-- [x] Documentation templates
-- [ ] Teams bot handler
-- [ ] Query parser
-- [ ] Mimecast client
-- [ ] Email auditor service
+### v0.2.0 (Current - MVP Complete)
+- [x] Project structure and documentation
+- [x] Teams bot infrastructure (CloudAdapter, message routing)
+- [x] Natural language query parsing with Anthropic Claude SDK
+- [x] Mimecast API integration (HMAC auth)
+- [x] Email auditor service
+- [x] Adaptive Card responses
+- [x] Health checks and logging
 
-### v0.2.0 (MVP - Next)
-- [ ] Natural language query parsing
-- [ ] Mimecast API integration
-- [ ] Adaptive Card responses
-- [ ] Health checks
+### v0.3.0 (Enhanced UX - Next)
+- [ ] Interactive buttons (Release, Block, Details) - Issue #1
+- [ ] Query history & caching - Issue #2
+- [ ] Advanced filtering (multiple senders, recipients) - Issue #3
+- [ ] Statistics & reporting - Issue #4
+- [ ] Testing framework (Jest, 90%+ coverage)
 
-### v0.3.0 (Enhanced UX)
-- [ ] Interactive buttons (Release, Block, Details)
-- [ ] Query history & caching
-- [ ] Advanced filtering (multiple senders, recipients)
-- [ ] Statistics & reporting
+### v0.4.0 (Advanced Features - Future)
+- [ ] Proactive alerts - Issue #5
+- [ ] Email release workflow - Issue #6
+- [ ] Multi-tenant support - Issue #7
 
-For complete roadmap, see [roadmap.md](./roadmap.md).
+For complete roadmap and GitHub issues, see [roadmap.md](./roadmap.md).
 
 ---
 
